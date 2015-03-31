@@ -136,6 +136,17 @@ handler({Mega, Secs, Micros})
     rep = fun (TP) -> transit_utils:timestamp_to_ms(TP) end,
     string_rep = fun (TP) -> integer_to_binary(transit_utils:timestamp_to_ms(TP)) end
   };
+handler({{Y, M, D}, {HH, MM, SS}}) when is_integer(Y),
+                                        is_integer(M) andalso M > 0 andalso M =< 12,
+                                        is_integer(D) andalso D > 0 andalso D =< 31,
+                                        is_integer(HH) andalso HH >= 0 andalso HH < 24,
+                                        is_integer(MM) andalso MM >= 0 andalso MM < 60,
+                                        is_number(SS) andalso SS >= 0 andalso SS < 61 ->
+  #write_handler{
+     tag = fun(_) -> ?DATE end,
+     rep = fun(DateTime) -> transit_utils:datetime_to_ms(DateTime) end,
+     string_rep = fun(DateTime) -> integer_to_binary(transit_utils:datetime_to_ms(DateTime)) end
+    };
 handler(Data) ->
   case transit_utils:is_set(Data) of
     undefined ->

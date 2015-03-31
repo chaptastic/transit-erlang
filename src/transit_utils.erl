@@ -4,6 +4,7 @@
 -export([iso_8601_to_timestamp/1]).
 -export([ms_to_timestamp/1]).
 -export([timestamp_to_ms/1]).
+-export([datetime_to_ms/1]).
 -export([double_to_binary/1]).
 -export([map_rep/1]).
 -export([uuid_to_string/1]).
@@ -66,6 +67,19 @@ double_to_binary(Double) ->
   [Rep] = io_lib:format("~w", [Double]),
   list_to_binary(Rep).
   %float_to_binary(F, [{decimals, 4},compact]).
+
+datetime_to_ms({{Y, M, D}, {HH, MM, SS}}) when is_float(SS) ->
+  Secs = trunc(SS),
+  FSecs = SS - Secs,
+  Ms = round(FSecs * 1000),
+  datetime_to_ms({{Y, M, D}, {HH, MM, Secs}}, Ms);
+datetime_to_ms(DateTime) ->
+  datetime_to_ms(DateTime, 0).
+
+datetime_to_ms(DateTime, MsecOffset) ->
+  Secs = calendar:datetime_to_gregorian_seconds(DateTime),
+  EpochSecs = Secs - 62167219200,
+  (EpochSecs * 1000) + MsecOffset.
 
 uuid_to_string([HI, LO]) ->
   <<U0:32, U1:16, U2:16, U3:16, U4:48>> = <<HI:64,LO:64>>,
